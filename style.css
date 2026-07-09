@@ -1,0 +1,59 @@
+body {
+  margin: 0;
+  height: 100vh;
+  background: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.heart-button {
+  width: 180px;
+  height: 160px;
+  background: #ff4f7b;
+  border: none;
+  cursor: pointer;
+  transform: rotate(-45deg);
+  position: relative;
+  font-size: 55px;
+  color: white;
+}
+
+.heart-button::before,
+.heart-button::after {
+  content: "";
+  width: 180px;
+  height: 160px;
+  background: #ff4f7b;
+  border-radius: 50%;
+  position: absolute;
+}
+
+.heart-button::before {
+  top: -90px;
+  left: 0;
+}
+
+.heart-button::after {
+  left: 90px;
+  top: 0;
+}
+
+.heart-button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.heart-button::before,
+.heart-button::after {
+  z-index: -1;
+}
+
+.heart-button {
+  z-index: 1;
+}
+
+.heart-button::selection {
+  background: transparent;
+}
