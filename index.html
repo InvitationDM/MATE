@@ -1,7 +1,9 @@
 <!DOCTYPE html>
-<html>
+<html lang="ka">
 <head>
+  <meta charset="UTF-8">
   <title>For You</title>
+
   <style>
     body {
       margin: 0;
@@ -14,6 +16,50 @@
       font-family: Arial, sans-serif;
     }
 
+    .container {
+      text-align: center;
+    }
+
+    .hint {
+      font-size: 24px;
+      color: #ff4f7b;
+      margin-bottom: 70px;
+      transition: opacity 1s ease;
+    }
+
+    .heart-wrapper {
+      position: relative;
+      width: 280px;
+      height: 260px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    svg.progress-ring {
+      position: absolute;
+      width: 280px;
+      height: 280px;
+      transform: rotate(-90deg);
+      z-index: 0;
+    }
+
+    .progress-bg {
+      fill: none;
+      stroke: #ffe0e9;
+      stroke-width: 6;
+    }
+
+    .progress {
+      fill: none;
+      stroke: #ff4f7b;
+      stroke-width: 6;
+      stroke-linecap: round;
+      stroke-dasharray: 817;
+      stroke-dashoffset: 817;
+      transition: stroke-dashoffset 0.2s linear;
+    }
+
     .heart-button {
       width: 180px;
       height: 160px;
@@ -24,6 +70,8 @@
       position: relative;
       animation: pulse 1.6s infinite;
       box-shadow: 0 12px 30px rgba(255, 79, 123, 0.25);
+      transition: opacity 2s ease, scale 2s ease;
+      z-index: 2;
     }
 
     .heart-button::before,
@@ -59,6 +107,26 @@
       z-index: 2;
     }
 
+    .fade-out {
+      opacity: 0;
+      scale: 0.3;
+      pointer-events: none;
+    }
+
+    .final-message {
+      display: none;
+      opacity: 0;
+      font-size: 42px;
+      color: #ff4f7b;
+      font-weight: bold;
+      transition: opacity 3s ease;
+    }
+
+    .final-message.show {
+      display: block;
+      opacity: 1;
+    }
+
     @keyframes pulse {
       0% { scale: 1; }
       50% { scale: 1.06; }
@@ -88,11 +156,24 @@
 
 <body>
 
-  <button class="heart-button" id="heartButton">
-    <svg class="play-icon" id="playIcon" width="60" height="60" viewBox="0 0 24 24">
-      <polygon id="playShape" points="7,5 20,12 7,19" fill="white"/>
-    </svg>
-  </button>
+  <div class="container">
+    <div class="hint" id="hint">Press my heart ❤️</div>
+
+    <div class="heart-wrapper" id="heartWrapper">
+      <svg class="progress-ring">
+        <circle class="progress-bg" cx="140" cy="140" r="130"></circle>
+        <circle class="progress" id="progress" cx="140" cy="140" r="130"></circle>
+      </svg>
+
+      <button class="heart-button" id="heartButton">
+        <svg class="play-icon" id="playIcon" width="60" height="60" viewBox="0 0 24 24">
+          <polygon id="playShape" points="7,5 20,12 7,19" fill="white"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="final-message" id="finalMessage">ჩემო ზღარბუნა ❤️</div>
+  </div>
 
   <audio id="voice">
     <source src="voice.mp3" type="audio/mpeg">
@@ -102,33 +183,65 @@
     const button = document.getElementById("heartButton");
     const audio = document.getElementById("voice");
     const playShape = document.getElementById("playShape");
+    const progress = document.getElementById("progress");
+    const hint = document.getElementById("hint");
+    const heartWrapper = document.getElementById("heartWrapper");
+    const finalMessage = document.getElementById("finalMessage");
+
+    const circumference = 817;
+    let heartInterval;
 
     button.addEventListener("click", () => {
       if (audio.paused) {
         audio.play();
         button.classList.add("playing");
-        playShape.setAttribute("points", "6,5 10,5 10,19 6,19 6,5 14,5 18,5 18,19 14,19 14,5");
+        hint.style.opacity = "0";
+
+        playShape.setAttribute(
+          "points",
+          "6,5 10,5 10,19 6,19 6,5 14,5 18,5 18,19 14,19 14,5"
+        );
+
         createHearts();
+        heartInterval = setInterval(createHearts, 1200);
       } else {
         audio.pause();
         button.classList.remove("playing");
+
         playShape.setAttribute("points", "7,5 20,12 7,19");
+        clearInterval(heartInterval);
+      }
+    });
+
+    audio.addEventListener("timeupdate", () => {
+      if (audio.duration) {
+        const percent = audio.currentTime / audio.duration;
+        progress.style.strokeDashoffset = circumference - percent * circumference;
       }
     });
 
     audio.addEventListener("ended", () => {
+      clearInterval(heartInterval);
+
       button.classList.remove("playing");
-      playShape.setAttribute("points", "7,5 20,12 7,19");
+      progress.style.strokeDashoffset = 0;
+
+      heartWrapper.classList.add("fade-out");
+
+      setTimeout(() => {
+        heartWrapper.style.display = "none";
+        finalMessage.classList.add("show");
+      }, 2000);
     });
 
     function createHearts() {
-      for (let i = 0; i < 18; i++) {
+      for (let i = 0; i < 8; i++) {
         const heart = document.createElement("div");
         heart.className = "floating-heart";
         heart.innerHTML = "♥";
 
         heart.style.left = Math.random() * window.innerWidth + "px";
-        heart.style.top = window.innerHeight / 2 + Math.random() * 80 + "px";
+        heart.style.top = window.innerHeight / 2 + Math.random() * 100 + "px";
 
         document.body.appendChild(heart);
 
