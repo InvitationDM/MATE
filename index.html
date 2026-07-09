@@ -2,17 +2,142 @@
 <html>
 <head>
   <title>For You</title>
-  <link rel="stylesheet" href="style.css">
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      background: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+      font-family: Arial, sans-serif;
+    }
+
+    .heart-button {
+      width: 180px;
+      height: 160px;
+      background: #ff4f7b;
+      border: none;
+      cursor: pointer;
+      transform: rotate(-45deg);
+      position: relative;
+      animation: pulse 1.6s infinite;
+      box-shadow: 0 12px 30px rgba(255, 79, 123, 0.25);
+    }
+
+    .heart-button::before,
+    .heart-button::after {
+      content: "";
+      width: 180px;
+      height: 160px;
+      background: #ff4f7b;
+      border-radius: 50%;
+      position: absolute;
+      z-index: -1;
+    }
+
+    .heart-button::before {
+      top: -90px;
+      left: 0;
+    }
+
+    .heart-button::after {
+      left: 90px;
+      top: 0;
+    }
+
+    .heart-button.playing,
+    .heart-button.playing::before,
+    .heart-button.playing::after {
+      background: #e91e63;
+    }
+
+    .play-icon {
+      transform: rotate(45deg);
+      position: relative;
+      z-index: 2;
+    }
+
+    @keyframes pulse {
+      0% { scale: 1; }
+      50% { scale: 1.06; }
+      100% { scale: 1; }
+    }
+
+    .floating-heart {
+      position: fixed;
+      color: #ff4f7b;
+      font-size: 24px;
+      animation: floatUp 2.4s ease-out forwards;
+      pointer-events: none;
+    }
+
+    @keyframes floatUp {
+      0% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+      100% {
+        opacity: 0;
+        transform: translateY(-160px) scale(1.8);
+      }
+    }
+  </style>
 </head>
+
 <body>
 
-  <button class="heart-button" onclick="document.getElementById('voice').play()">
-    ▶
+  <button class="heart-button" id="heartButton">
+    <svg class="play-icon" id="playIcon" width="60" height="60" viewBox="0 0 24 24">
+      <polygon id="playShape" points="7,5 20,12 7,19" fill="white"/>
+    </svg>
   </button>
 
   <audio id="voice">
     <source src="voice.mp3" type="audio/mpeg">
   </audio>
+
+  <script>
+    const button = document.getElementById("heartButton");
+    const audio = document.getElementById("voice");
+    const playShape = document.getElementById("playShape");
+
+    button.addEventListener("click", () => {
+      if (audio.paused) {
+        audio.play();
+        button.classList.add("playing");
+        playShape.setAttribute("points", "6,5 10,5 10,19 6,19 6,5 14,5 18,5 18,19 14,19 14,5");
+        createHearts();
+      } else {
+        audio.pause();
+        button.classList.remove("playing");
+        playShape.setAttribute("points", "7,5 20,12 7,19");
+      }
+    });
+
+    audio.addEventListener("ended", () => {
+      button.classList.remove("playing");
+      playShape.setAttribute("points", "7,5 20,12 7,19");
+    });
+
+    function createHearts() {
+      for (let i = 0; i < 18; i++) {
+        const heart = document.createElement("div");
+        heart.className = "floating-heart";
+        heart.innerHTML = "♥";
+
+        heart.style.left = Math.random() * window.innerWidth + "px";
+        heart.style.top = window.innerHeight / 2 + Math.random() * 80 + "px";
+
+        document.body.appendChild(heart);
+
+        setTimeout(() => {
+          heart.remove();
+        }, 2400);
+      }
+    }
+  </script>
 
 </body>
 </html>
